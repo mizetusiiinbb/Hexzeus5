@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZEUS 1-Click Cloudflare Auto-Deployer — استقرار خودکار پنل زئوس</title>
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-card: rgba(15, 18, 30, 0.88);
+      --border: rgba(139, 92, 246, 0.3);
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --accent: #00f0ff;
+      --accent-gold: #fbbf24;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --danger: #ef4444;
+      --success: #10b981;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Vazirmatn", Tahoma, sans-serif;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.15) 0%, transparent 45%);
+    }
+
+    header {
+      padding: 20px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7, 9, 14, 0.88);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #8b5cf6, #00f0ff);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
+    }
+
+    .brand-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #fff, #c4b5fd, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .badge-pill {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid var(--primary);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+      margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    .token-box {
+      background: rgba(10, 13, 24, 0.9);
+      border: 2px solid rgba(139, 92, 246, 0.4);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      transition: all 0.3s;
+    }
+
+    .token-box:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      font-family: var(--font-mono);
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+    }
+
+    .btn-launch {
+      width: 100%;
+      background: linear-gradient(135deg, #8b5cf6, #00f0ff);
+      color: #06080f;
+      font-weight: 800;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 12px;
+      padding: 18px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 6px 30px rgba(139, 92, 246, 0.5);
+      transition: all 0.3s;
+    }
+
+    .btn-launch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 35px rgba(0, 240, 255, 0.7);
+    }
+
+    .btn-launch:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .steps-container {
+      margin-top: 28px;
+      display: none;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+
+    .step-item.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .step-item.done {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: var(--success);
+      color: #34d399;
+    }
+
+    .step-item.error {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--danger);
+      color: #f87171;
+    }
+
+    .step-icon {
+      font-size: 1.2rem;
+      width: 28px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .result-card {
+      display: none;
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.1), rgba(15, 23, 42, 0.95));
+      border: 2px solid var(--success);
+      border-radius: 18px;
+      padding: 28px;
+      margin-top: 28px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #34d399;
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .result-item {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .result-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .result-value {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: var(--accent);
+      word-break: break-all;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-copy-small {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-copy-small:hover {
+      background: var(--primary);
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      flex: 1;
+      min-width: 200px;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-action-primary {
+      background: var(--success);
+      color: #050b14;
+    }
+
+    .btn-action-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .accordion-toggle {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      font-weight: 600;
+    }
+
+    .accordion-content {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-wrap">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1 class="brand-title">ZEUS 1-Click Cloudflare Auto-Deployer</h1>
+        <p class="brand-sub">استقرار هوشمند، خودکار و چندریختی مخزن z-e-u-s در کلودفلر</p>
+      </div>
+    </div>
+    <div class="badge-pill">
+      <span>● فقط توکن کلودفلر را وارد کنید</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h2 class="hero-title">
+        <span>🚀 استقرار ۱۰۰٪ خودکار بدون نیاز به گیت‌هاب یا ابزار جانبی</span>
+      </h2>
+      <p class="hero-desc">
+        کافی است <strong>Cloudflare API Token</strong> خود را وارد کنید. سیستم به‌طور کاملاً خودکار سورس رسمی <strong>Z-E-U-S</strong> را دریافت کرده، برای شما یک نام تصادفی و پوششی می‌سازد، مسیر ادمین و کدهای آن را به صورت منحصربه‌فرد <strong>مبهم‌سازی (Polymorphic Obfuscation)</strong> می‌کند، پایگاه داده D1 اختصاصی را در حساب شما ایجاد کرده و ورکر را در کلودفلر منتشر می‌کند.
+      </p>
+
+      <div class="token-box">
+        <div class="form-group">
+          <label for="cf-token">کلید API کلودفلر (Cloudflare API Token):</label>
+          <input type="password" id="cf-token" placeholder="مثال: abc123def456_YOUR_CLOUDFLARE_API_TOKEN" autofocus>
+          <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 6px;">
+            نیاز به دسترسی: <code>Account:Workers Scripts (Edit)</code> و <code>Account:D1 (Edit)</code> و <code>User:Memberships (Read)</code>
+          </small>
+        </div>
+
+        <button class="accordion-toggle" id="btn-toggle-adv">
+          <span>⚙️ تنظیمات پیشرفته (اختیاری)</span>
+          <span id="adv-arrow">▼</span>
+        </button>
+
+        <div class="accordion-content" id="adv-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label>پیشوند نام دلخواه ورکر (اختیاری):</label>
+              <input type="text" id="custom-name" placeholder="پیش‌فرض: نام پوششی تصادفی">
+            </div>
+            <div class="form-group">
+              <label>مسیر ادمین دلخواه (اختیاری):</label>
+              <input type="text" id="custom-admin" placeholder="پیش‌فرض: /admin_xxxx تصادفی">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-launch" id="btn-deploy">
+        <span>⚡ استقرار خودکار و آنلاین پنل زئوس</span>
+      </button>
+
+      <!-- LIVE STEP PROGRESS -->
+      <div class="steps-container" id="steps-box">
+        <div class="step-item" id="step-1">
+          <span class="step-icon">🔑</span>
+          <span>گام ۱: اعتبارسنجی توکن کلودفلر و شناسایی Account ID...</span>
+        </div>
+        <div class="step-item" id="step-2">
+          <span class="step-icon">🎲</span>
+          <span>گام ۲: تولید نام تصادفی پوششی، مسیر ادمین اختصاصی و Root UUID...</span>
+        </div>
+        <div class="step-item" id="step-3">
+          <span class="step-icon">🔒</span>
+          <span>گام ۳: دریافت سورس Z-E-U-S و اعمال مبهم‌سازی چندریختی (Base64/Hex/Rotator)...</span>
+        </div>
+        <div class="step-item" id="step-4">
+          <span class="step-icon">🗄️</span>
+          <span>گام ۴: ساخت خودکار پایگاه داده Cloudflare D1 در اکانت شما...</span>
+        </div>
+        <div class="step-item" id="step-5">
+          <span class="step-icon">🚀</span>
+          <span>گام ۵: استقرار ورکر در شبکه جهانی کلودفلر همراه با بایندینگ D1...</span>
+        </div>
+        <div class="step-item" id="step-6">
+          <span class="step-icon">🌐</span>
+          <span>گام ۶: فعال‌سازی روتینگ دامنه workers.dev...</span>
+        </div>
+        <div class="step-item" id="step-7">
+          <span class="step-icon">✨</span>
+          <span>گام ۷: استقرار با موفقیت پایان یافت! پنل آنلاین شد.</span>
+        </div>
+      </div>
+
+      <!-- SUCCESS RESULT CARD -->
+      <div class="result-card" id="result-box">
+        <div class="result-header">
+          <span>🎉 استقرار منحصربه‌فرد پنل زئوس با موفقیت انجام شد!</span>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="result-label">🔗 آدرس مستقیم پنل ادمین (با مسیر مخفی اختصاصی):</div>
+            <div class="result-value">
+              <span id="res-panel-url">-</span>
+              <button class="btn-copy-small" onclick="copyText('res-panel-url')">کپی آدرس</button>
+            </div>
+          </div>
+
+          <div class="result-item">
+            <div class="result-label">📡 آدرس دریافت سابسکریپشن کلاینت‌ها:</div>
+            <div class="result-value">
+              <span id="res-sub-url">-</span>
+              <button class="btn-copy-small" onclick="copyText('res-sub-url')">کپی لینک</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="result-item">
+              <div class="result-label">🏷️ نام ورکر اختصاصی (پوششی):</div>
+              <div class="result-value" id="res-worker-name">-</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">🗄️ دیتابیس D1 کلودفلر:</div>
+              <div class="result-value" id="res-d1-name">-</div>
+            </div>
+          </div>
+
+          <div class="result-item">
+            <div class="result-label">🔑 شناسه UUID کاربر پیش‌فرض:</div>
+            <div class="result-value">
+              <span id="res-uuid">-</span>
+              <button class="btn-copy-small" onclick="copyText('res-uuid')">کپی UUID</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-actions">
+          <a id="btn-open-panel" href="#" target="_blank" class="btn-action btn-action-primary">
+            <span>🌐 باز کردن پنل مدیریت</span>
+          </a>
+          <button class="btn-action btn-action-secondary" onclick="resetForm()">
+            <span>🔄 استقرار پنل دیگر</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btnAdv = document.getElementById("btn-toggle-adv");
+    const advContent = document.getElementById("adv-content");
+    const advArrow = document.getElementById("adv-arrow");
+
+    btnAdv.addEventListener("click", () => {
+      const isVisible = advContent.style.display === "block";
+      advContent.style.display = isVisible ? "none" : "block";
+      advArrow.textContent = isVisible ? "▼" : "▲";
+    });
+
+    function setStep(num, status) {
+      const el = document.getElementById(`step-${num}`);
+      if (!el) return;
+      el.className = `step-item ${status}`;
+    }
+
+    function copyText(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text);
+      alert("در کلیپ‌بورد کپی شد: " + text);
+    }
+
+    function resetForm() {
+      document.getElementById("result-box").style.display = "none";
+      document.getElementById("steps-box").style.display = "none";
+      document.getElementById("btn-deploy").disabled = false;
+      for (let i = 1; i <= 7; i++) setStep(i, "");
+    }
+
+    document.getElementById("btn-deploy").addEventListener("click", async () => {
+      const token = document.getElementById("cf-token").value.trim();
+      if (!token) {
+        alert("لطفاً توکن API کلودفلر را وارد کنید.");
+        return;
+      }
+
+      const customName = document.getElementById("custom-name").value.trim();
+      const customAdmin = document.getElementById("custom-admin").value.trim();
+
+      const btnDeploy = document.getElementById("btn-deploy");
+      btnDeploy.disabled = true;
+
+      const stepsBox = document.getElementById("steps-box");
+      stepsBox.style.display = "block";
+      document.getElementById("result-box").style.display = "none";
+
+      for (let i = 1; i <= 7; i++) setStep(i, "");
+
+      try {
+        setStep(1, "active");
+
+        const resp = await fetch("/api/deploy/cloudflare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cf_token: token,
+            custom_name: customName || null,
+            custom_admin_path: customAdmin || null
+          })
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json();
+          setStep(1, "error");
+          alert("خطا در استقرار: " + (err.detail || "مشکل ارتباط با کلودفلر"));
+          btnDeploy.disabled = false;
+          return;
+        }
+
+        setStep(1, "done");
+        setStep(2, "done");
+        setStep(3, "done");
+        setStep(4, "done");
+        setStep(5, "done");
+        setStep(6, "done");
+        setStep(7, "done");
+
+        const data = await resp.json();
+
+        document.getElementById("res-panel-url").textContent = data.panel_url;
+        document.getElementById("res-sub-url").textContent = data.subscription_url;
+        document.getElementById("res-worker-name").textContent = data.script_name;
+        document.getElementById("res-d1-name").textContent = data.d1_database;
+        document.getElementById("res-uuid").textContent = data.uuid;
+        document.getElementById("btn-open-panel").href = data.panel_url;
+
+        document.getElementById("result-box").style.display = "block";
+        btnDeploy.disabled = false;
+
+      } catch (err) {
+        setStep(1, "error");
+        alert("خطا در ارسال درخواست به سرور: " + err.message);
+        btnDeploy.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

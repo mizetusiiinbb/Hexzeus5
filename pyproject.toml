@@ -1,0 +1,15 @@
+[project]
+name = "zeus-auto-deployer"
+version = "2.0.0"
+description = "ZEUS one-click Cloudflare Worker deployer"
+requires-python = ">=3.13"
+dependencies = [
+  "fastapi",
+  "pydantic",
+]
+
+[dependency-groups]
+dev = [
+  "workers-py",
+  "workers-runtime-sdk",
+]
